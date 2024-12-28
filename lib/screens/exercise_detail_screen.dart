@@ -127,8 +127,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         dayName: widget.dayName,
       );
 
-      final program =
-          await widget.database.getProgram(1);
+      final program = await widget.database.getProgram(1);
       if (program != null) {
         if (program.workoutPlansByDay.containsKey(widget.dayName)) {
           if (_workoutPlan == null) {
@@ -144,8 +143,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           program.workoutPlansByDay[widget.dayName] = [workoutPlan];
         }
 
-        await widget.database
-            .updateProgram(program);
+        await widget.database.updateProgram(program);
       }
 
       _isNewExercise = false;
@@ -201,12 +199,10 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         },
                       ),
                     ),
-
                     _buildExerciseTypeSelector(
                       isEnabled:
                           widget.isEditable && (_isNewExercise || !isMainLift),
                     ),
-
                     _buildMuscleGroupSelector(
                       title: 'Main Muscle Groups',
                       selectedMuscleGroups: _selectedMainMuscleGroups,
@@ -216,8 +212,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         setState(() {
                           if (selected) {
                             _selectedMainMuscleGroups.add(muscleGroup);
-                            _selectedAuxiliaryMuscleGroups
-                                .remove(muscleGroup);
+                            _selectedAuxiliaryMuscleGroups.remove(muscleGroup);
                           } else {
                             _selectedMainMuscleGroups.remove(muscleGroup);
                           }
@@ -226,7 +221,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                       isEnabled:
                           widget.isEditable && (_isNewExercise || !isMainLift),
                     ),
-
                     _buildMuscleGroupSelector(
                       title: 'Auxiliary Muscle Groups',
                       selectedMuscleGroups: _selectedAuxiliaryMuscleGroups,
@@ -236,8 +230,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         setState(() {
                           if (selected) {
                             _selectedAuxiliaryMuscleGroups.add(muscleGroup);
-                            _selectedMainMuscleGroups
-                                .remove(muscleGroup);
+                            _selectedMainMuscleGroups.remove(muscleGroup);
                           } else {
                             _selectedAuxiliaryMuscleGroups.remove(muscleGroup);
                           }
@@ -246,7 +239,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                       isEnabled:
                           widget.isEditable && (_isNewExercise || !isMainLift),
                     ),
-
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
@@ -266,7 +258,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         ],
                       ),
                     ),
-
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -328,6 +319,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: _saveExerciseDetails,
+                style: Theme.of(context).elevatedButtonTheme.style,
                 child: const Text('Save'),
               ),
             ),
@@ -386,8 +378,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
               return FilterChip(
                 label: Text(muscleGroup),
                 selected: isSelected,
-                onSelected: isEnabled &&
-                        !isDisabled(muscleGroup)
+                onSelected: isEnabled && !isDisabled(muscleGroup)
                     ? (selected) {
                         onSelected(selected, muscleGroup);
                       }

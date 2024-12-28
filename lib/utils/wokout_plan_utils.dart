@@ -13,7 +13,7 @@ Map<String, List<modelWorkoutPlan.WorkoutPlan>> generateInitialWorkoutPlansByDay
     'Deadlift Day': [
       modelWorkoutPlan.WorkoutPlan(
         exerciseName: 'Deadlift',
-        sets: 5,
+        sets: 3,
         reps: 5,
         RPE: null,
         completed: false,
@@ -24,7 +24,7 @@ Map<String, List<modelWorkoutPlan.WorkoutPlan>> generateInitialWorkoutPlansByDay
     'Bench Press Day': [
       modelWorkoutPlan.WorkoutPlan(
         exerciseName: 'Bench Press',
-        sets: 5,
+        sets: 3,
         reps: 5,
         RPE: null,
         completed: false,
@@ -35,7 +35,7 @@ Map<String, List<modelWorkoutPlan.WorkoutPlan>> generateInitialWorkoutPlansByDay
     'Squat Day': [
       modelWorkoutPlan.WorkoutPlan(
         exerciseName: 'Squat',
-        sets: 5,
+        sets: 3,
         reps: 5,
         RPE: null,
         completed: false,
@@ -46,7 +46,7 @@ Map<String, List<modelWorkoutPlan.WorkoutPlan>> generateInitialWorkoutPlansByDay
     'Overhead Press Day': [
       modelWorkoutPlan.WorkoutPlan(
         exerciseName: 'Overhead Press',
-        sets: 5,
+        sets: 3,
         reps: 5,
         RPE: null,
         completed: false,

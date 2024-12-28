@@ -3,6 +3,8 @@ import 'package:iron_born/database/app_database.dart' as db;
 import 'package:iron_born/models/workout_plan.dart' as model;
 import 'package:iron_born/screens/exercise_detail_screen.dart';
 
+import 'home_screen.dart';
+
 class WorkoutScreen extends StatefulWidget {
   final db.AppDatabase database;
   final List<model.WorkoutPlan> workoutPlans;
@@ -37,7 +39,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _initializeSetCompletionStatus();
     _loadTrainingPRs();
 
-    _expansionTileControllers = List.generate(widget.workoutPlans.length, (index) => ExpansionTileController());
+    _expansionTileControllers = List.generate(
+        widget.workoutPlans.length, (index) => ExpansionTileController());
   }
 
   Future<void> _initializeSetCompletionStatus() async {
@@ -55,18 +58,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Future<void> _loadTrainingPRs() async {
     final user = await widget.database.getUser();
     if (user != null && user.prs != null) {
-      _trainingPRs = user.prs!.map((key, value) => MapEntry(key, value.toDouble()));
+      _trainingPRs =
+          user.prs!.map((key, value) => MapEntry(key, value.toDouble()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        expansionTileTheme: ExpansionTileThemeData(
-          backgroundColor: Colors.grey[200],
-        ),
-      ),child: WillPopScope(
+    return WillPopScope(
       onWillPop: () async {
         Navigator.pop(context, isWorkoutCompleted);
         return false;
@@ -84,18 +83,22 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               return ListView.builder(
                 itemCount: widget.workoutPlans.length,
                 itemBuilder: (context, index) {
-                  if (widget.workoutPlans == null || widget.workoutPlans.isEmpty) {
+                  if (widget.workoutPlans == null ||
+                      widget.workoutPlans.isEmpty) {
                     return const Center(child: Text('No workout plans found.'));
                   }
                   final plan = widget.workoutPlans[index];
                   final exerciseName = plan.exerciseName ?? 'Unknown Exercise';
 
-                  bool initiallyExpanded = index == _findNextUncompletedExerciseIndex();
+                  bool initiallyExpanded =
+                      index == _findNextUncompletedExerciseIndex();
 
-                  if (['Deadlift', 'Bench Press', 'Squat', 'Overhead Press'].contains(exerciseName)) {
-                    final sets = plan.sets; // Should always be 3
+                  if (['Deadlift', 'Bench Press', 'Squat', 'Overhead Press']
+                      .contains(exerciseName)) {
+                    final sets = plan.sets;
                     final reps = plan.reps;
-                    final weight = _calculateWeight(exerciseName, sets, reps, _currentWeek);
+                    final weight = _calculateWeight(
+                        exerciseName, sets, reps, _currentWeek);
 
                     return Card(
                       child: ExpansionTile(
@@ -106,13 +109,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                         children: [
                           ...List.generate(3, (setIndex) {
                             final overallSetIndex = setIndex + 1;
-                            final setWeight = weight != null ? weight[setIndex] : (plan.weight ?? 0.0);
+                            final setWeight = weight != null
+                                ? weight[setIndex]
+                                : (plan.weight ?? 0.0);
                             final setKey = '$exerciseName-$overallSetIndex';
 
                             return SizedBox(
                               height: 60,
                               child: ListTile(
-                                title: Text('Set $overallSetIndex: ${setWeight.toStringAsFixed(1)} kg x $reps reps'),
+                                title: Text(
+                                    'Set $overallSetIndex: ${setWeight.toStringAsFixed(1)} kg x $reps reps'),
                                 trailing: Checkbox(
                                   value: _getSetCompletionStatus(setKey),
                                   onChanged: (value) async {
@@ -120,33 +126,55 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                       _setSetCompletionStatus(setKey, value!);
                                     });
 
-                                    final program = await widget.database.getProgram(1);
+                                    final program =
+                                        await widget.database.getProgram(1);
                                     if (program != null) {
-                                      final workoutPlansForDay = program.workoutPlansByDay[widget.dayName]!;
-                                      final planIndex = workoutPlansForDay.indexWhere((p) => p.exerciseName == exerciseName);
+                                      final workoutPlansForDay = program
+                                          .workoutPlansByDay[widget.dayName]!;
+                                      final planIndex =
+                                          workoutPlansForDay.indexWhere((p) =>
+                                              p.exerciseName == exerciseName);
                                       if (planIndex != -1) {
-                                        workoutPlansForDay[planIndex] = workoutPlansForDay[planIndex].copyWith(completed: value!);
-                                        await widget.database.updateProgram(program);
+                                        workoutPlansForDay[planIndex] =
+                                            workoutPlansForDay[planIndex]
+                                                .copyWith(completed: value!);
+                                        await widget.database
+                                            .updateProgram(program);
                                       }
                                     }
 
-                                    bool allSetsCompleted = _setCompletionStatus.values.every((sets) => sets.values.every((isCompleted) => isCompleted));
+                                    bool allSetsCompleted = _setCompletionStatus
+                                        .values
+                                        .every((sets) => sets.values.every(
+                                            (isCompleted) => isCompleted));
 
                                     if (allSetsCompleted) {
                                       _markWorkoutAsCompleted();
                                       _showWorkoutCompletionFeedbackWithOptions();
-                                    } else if (value! && overallSetIndex == sets && _isExerciseCompleted(plan)) {
-                                      _expansionTileControllers[index].collapse();
+                                    } else if (value! &&
+                                        overallSetIndex == sets &&
+                                        _isExerciseCompleted(plan)) {
+                                      _expansionTileControllers[index]
+                                          .collapse();
 
-                                      int nextUncompletedIndex = _findNextUncompletedExerciseIndex();
+                                      int nextUncompletedIndex =
+                                          _findNextUncompletedExerciseIndex();
                                       if (nextUncompletedIndex != -1) {
-                                        _expansionTileControllers[nextUncompletedIndex].expand();
+                                        _expansionTileControllers[
+                                                nextUncompletedIndex]
+                                            .expand();
                                       }
                                     }
 
                                     if (value! && overallSetIndex == sets) {
-                                      if (['Deadlift', 'Bench Press', 'Squat', 'Overhead Press'].contains(exerciseName)) {
-                                        _handleMainLiftCompletion(exerciseName, reps);
+                                      if ([
+                                        'Deadlift',
+                                        'Bench Press',
+                                        'Squat',
+                                        'Overhead Press'
+                                      ].contains(exerciseName)) {
+                                        _handleMainLiftCompletion(
+                                            exerciseName, reps);
                                       } else {
                                         widget.onCycleCompleted(exerciseName);
                                       }
@@ -171,9 +199,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                   ),
                                 ),
                               ).then((updatedPlan) {
-                                if (updatedPlan != null && updatedPlan is model.WorkoutPlan) {
+                                if (updatedPlan != null &&
+                                    updatedPlan is model.WorkoutPlan) {
                                   setState(() {
-                                    final index = widget.workoutPlans.indexWhere((p) => p.id == updatedPlan.id);
+                                    final index = widget.workoutPlans
+                                        .indexWhere(
+                                            (p) => p.id == updatedPlan.id);
                                     if (index != -1) {
                                       widget.workoutPlans[index] = updatedPlan;
                                     }
@@ -192,21 +223,23 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                         controller: _expansionTileControllers[index],
                         title: _buildExerciseHeader(plan, index),
                         initiallyExpanded: initiallyExpanded,
-                        onExpansionChanged: (isExpanded) {
-                        },
+                        onExpansionChanged: (isExpanded) {},
                         children: [
                           SingleChildScrollView(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                ..._buildWorkoutSets(List.generate(plan.sets, (_) => plan), index),
+                                ..._buildWorkoutSets(
+                                    List.generate(plan.sets, (_) => plan),
+                                    index),
                                 ListTile(
                                   title: const Text('Inspect'),
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ExerciseDetailScreen(
+                                        builder: (context) =>
+                                            ExerciseDetailScreen(
                                           database: widget.database,
                                           exerciseName: exerciseName,
                                           isEditable: widget.isEditable,
@@ -215,11 +248,15 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                         ),
                                       ),
                                     ).then((updatedPlan) {
-                                      if (updatedPlan != null && updatedPlan is model.WorkoutPlan) {
+                                      if (updatedPlan != null &&
+                                          updatedPlan is model.WorkoutPlan) {
                                         setState(() {
-                                          final index = widget.workoutPlans.indexWhere((p) => p.id == updatedPlan.id);
+                                          final index = widget.workoutPlans
+                                              .indexWhere((p) =>
+                                                  p.id == updatedPlan.id);
                                           if (index != -1) {
-                                            widget.workoutPlans[index] = updatedPlan;
+                                            widget.workoutPlans[index] =
+                                                updatedPlan;
                                           }
                                         });
                                       }
@@ -241,14 +278,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
-            onPressed: () {
-              _markWorkoutAsCompleted();
-            },
-            child: const Text('Skip to Next Day'),
-          ),
+              onPressed: () {
+                _markWorkoutAsCompleted();
+              },
+              child: const Text('Skip to Next Day'),
+              style: Theme.of(context).elevatedButtonTheme.style),
         ),
       ),
-    ),
     );
   }
 
@@ -303,7 +339,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   int _getCompletedSetsCount(model.WorkoutPlan plan) {
     final exerciseName = plan.exerciseName!;
-    return _setCompletionStatus[exerciseName]?.values.where((isCompleted) => isCompleted).length ?? 0;
+    return _setCompletionStatus[exerciseName]
+            ?.values
+            .where((isCompleted) => isCompleted)
+            .length ??
+        0;
   }
 
   bool _isExerciseCompleted(model.WorkoutPlan plan) {
@@ -312,7 +352,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return completedSets == totalSets;
   }
 
-  List<Widget> _buildWorkoutSets(List<model.WorkoutPlan> plans, int exerciseIndex) {
+  List<Widget> _buildWorkoutSets(
+      List<model.WorkoutPlan> plans, int exerciseIndex) {
     final originalPlan = widget.workoutPlans[exerciseIndex];
     return plans.asMap().entries.map((entry) {
       final plan = entry.value;
@@ -324,14 +365,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
       final sets = originalPlan.sets;
 
-      final isMainLift = ['Deadlift', 'Bench Press', 'Squat', 'Overhead Press'].contains(exerciseName);
+      final isMainLift = ['Deadlift', 'Bench Press', 'Squat', 'Overhead Press']
+          .contains(exerciseName);
 
       final setKey = '$exerciseName-$overallSetIndex';
 
       return SizedBox(
         height: 60,
         child: ListTile(
-          title: Text('Set $overallSetIndex: ${weight != null ? '${weight.toStringAsFixed(1)} kg x' : ''} $reps reps'),
+          title: Text(
+              'Set $overallSetIndex: ${weight != null ? '${weight.toStringAsFixed(1)} kg x' : ''} $reps reps'),
           trailing: Checkbox(
             value: _getSetCompletionStatus(setKey),
             onChanged: (value) async {
@@ -341,20 +384,26 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
               final program = await widget.database.getProgram(1);
               if (program != null) {
-                final workoutPlansForDay = program.workoutPlansByDay[widget.dayName]!;
-                final planIndex = workoutPlansForDay.indexWhere((p) => p.exerciseName == exerciseName);
+                final workoutPlansForDay =
+                    program.workoutPlansByDay[widget.dayName]!;
+                final planIndex = workoutPlansForDay
+                    .indexWhere((p) => p.exerciseName == exerciseName);
                 if (planIndex != -1) {
-                  workoutPlansForDay[planIndex] = workoutPlansForDay[planIndex].copyWith(completed: value!);
+                  workoutPlansForDay[planIndex] =
+                      workoutPlansForDay[planIndex].copyWith(completed: value!);
                   await widget.database.updateProgram(program);
                 }
               }
 
-              bool allSetsCompleted = _setCompletionStatus.values.every((sets) => sets.values.every((isCompleted) => isCompleted));
+              bool allSetsCompleted = _setCompletionStatus.values.every(
+                  (sets) => sets.values.every((isCompleted) => isCompleted));
 
               if (allSetsCompleted) {
                 _markWorkoutAsCompleted();
                 _showWorkoutCompletionFeedbackWithOptions();
-              } else if (value! && overallSetIndex == sets && _isExerciseCompleted(originalPlan)) {
+              } else if (value! &&
+                  overallSetIndex == sets &&
+                  _isExerciseCompleted(originalPlan)) {
                 _expansionTileControllers[exerciseIndex].collapse();
 
                 int nextUncompletedIndex = _findNextUncompletedExerciseIndex();
@@ -391,7 +440,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _setCompletionStatus[exerciseName]?[setIndex] = isCompleted;
   }
 
-  List<double>? _calculateWeight(String exerciseName, int setNumber, int reps, int currentWeek) {
+  List<double>? _calculateWeight(
+      String exerciseName, int setNumber, int reps, int currentWeek) {
     if (_trainingPRs.containsKey(exerciseName)) {
       final trainingMax = _trainingPRs[exerciseName]!;
       final week1Percentages = [0.65, 0.75, 0.85];
@@ -410,43 +460,39 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       }
 
       return List.generate(setNumber, (setIndex) {
-          if (setIndex < 3) {
-            final setPercentage = setPercentages[setIndex];
-            return (trainingMax * setPercentage).roundToDouble();
-          } else {
-            return null;
-          }
-        }).whereType<double>().toList();
-      } else {
+        if (setIndex < 3) {
+          final setPercentage = setPercentages[setIndex];
+          return (trainingMax * setPercentage).roundToDouble();
+        } else {
+          return null;
+        }
+      }).whereType<double>().toList();
+    } else {
       return null;
-      }
-      }
+    }
+  }
 
   void _handleMainLiftCompletion(String exerciseName, int reps) async {
     final program = await widget.database.getProgram(1);
     if (program != null) {
       final workoutPlansForDay = program.workoutPlansByDay[widget.dayName]!;
-      final planIndex = workoutPlansForDay.indexWhere((p) => p.exerciseName == exerciseName);
+      final planIndex =
+          workoutPlansForDay.indexWhere((p) => p.exerciseName == exerciseName);
       if (planIndex != -1) {
         final lift = workoutPlansForDay[planIndex];
-        final increment = exerciseName == 'Deadlift' || exerciseName == 'Squat' ? 2.5 : 1.25;
-        workoutPlansForDay[planIndex] = lift.copyWith(weight: (lift.weight ?? 0) + increment);
+        final increment =
+            exerciseName == 'Deadlift' || exerciseName == 'Squat' ? 2.5 : 1.25;
+        workoutPlansForDay[planIndex] =
+            lift.copyWith(weight: (lift.weight ?? 0) + increment);
         await widget.database.updateProgram(program);
         setState(() {});
       }
     }
   }
 
-  bool _hasFeedbackBeenShown = false;
-
   void _markWorkoutAsCompleted() async {
     if (!isWorkoutCompleted) {
-      if (!_hasFeedbackBeenShown) {
-        _showWorkoutCompletionFeedbackWithOptions();
-        _hasFeedbackBeenShown = true;
-      } else {
-        _loadNextWorkoutOrReturnHome();
-      }
+      _showWorkoutCompletionFeedbackWithOptions(); // Always show the dialog
     }
   }
 
@@ -458,47 +504,52 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         content: const Text('Great job! You have completed your workout.'),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _loadNextWorkoutOrReturnHome();
+            onPressed: () async {
+              Navigator.pop(context); // Close the dialog
+
+              final program = await widget.database.getProgram(1);
+              if (program != null) {
+                final days = program.workoutPlansByDay.keys.toList();
+                final currentDayIndex = days.indexOf(widget.dayName);
+
+                if (currentDayIndex < days.length - 1) {
+                  final nextWorkoutDay = days[currentDayIndex + 1];
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WorkoutScreen(
+                        database: widget.database,
+                        dayName: nextWorkoutDay,
+                        workoutPlans:
+                            program.workoutPlansByDay[nextWorkoutDay] ?? [],
+                        onCycleCompleted: widget.onCycleCompleted,
+                        isEditable: widget.isEditable,
+                      ),
+                    ),
+                    (route) => route.isFirst,
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            HomeScreen(database: widget.database)),
+                    (route) => false,
+                  );
+                }
+              }
             },
             child: const Text('Go to Next Day'),
           ),
           TextButton(
-            onPressed: () {Navigator.of(context).popUntil((route) => route.isFirst);
+            onPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
             child: const Text('Return to Home'),
           ),
         ],
       ),
     );
-  }
-
-  void _loadNextWorkoutOrReturnHome() async {
-    isWorkoutCompleted = true;
-
-    final program = await widget.database.getProgram(1);
-    if (program != null) {
-      final days = program.workoutPlansByDay.keys.toList();
-      final currentDayIndex = days.indexOf(widget.dayName);
-
-      if (currentDayIndex < days.length - 1) {
-        final nextWorkoutDay = days[currentDayIndex + 1];
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WorkoutScreen(
-              database: widget.database,
-              dayName: nextWorkoutDay,workoutPlans: program.workoutPlansByDay[nextWorkoutDay] ?? [],
-              onCycleCompleted: widget.onCycleCompleted,
-              isEditable: widget.isEditable,
-            ),
-          ),
-        );
-      } else {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      }
-    }
   }
 }

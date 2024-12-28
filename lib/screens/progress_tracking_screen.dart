@@ -15,7 +15,7 @@ class ProgressTrackingScreen extends StatefulWidget {
 
 class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
   Map<String, List<modelWorkoutPlan.WorkoutPlan>> _workoutPlansByDay = {};
-  final Map<String, double> _muscleGroupVolumes= {};
+  final Map<String, double> _muscleGroupVolumes = {};
   modelUser.User? _currentUser;
 
   @override
@@ -57,21 +57,23 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
       body: _currentUser == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
-        children: [
-          Expanded(
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(),
-              series: <ChartSeries>[
-                BarSeries<MapEntry<String, double>, String>(
-                  dataSource: _muscleGroupVolumes.entries.toList(),
-                  xValueMapper: (entry, _) => entry.key,
-                  yValueMapper: (entry, _) => entry.value,
+              children: [
+                Expanded(
+                  child: SfCartesianChart(
+                    primaryXAxis: CategoryAxis(),
+                    series: <ChartSeries>[
+                      BarSeries<MapEntry<String, double>, String>(
+                        dataSource: _muscleGroupVolumes.entries.toList(),
+                        xValueMapper: (entry, _) => entry.key,
+                        yValueMapper: (entry, _) => entry.value,
+                        borderColor: Colors.white,
+                        borderWidth: 2,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

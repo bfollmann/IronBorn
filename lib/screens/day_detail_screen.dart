@@ -23,7 +23,8 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _loadExercises();}
+    _loadExercises();
+  }
 
   Future<void> _loadExercises() async {
     final program = await widget.database.getProgram(1);
@@ -81,7 +82,8 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
         itemCount: _exercises.length,
         itemBuilder: (context, index) {
           final exercise = _exercises[index];
-          final isMainLift = index == 0 && exercise.exerciseName == widget.dayName;
+          final isMainLift =
+              index == 0 && exercise.exerciseName == widget.dayName;
 
           return ReorderableDragStartListener(
             key: ValueKey(exercise.exerciseName),
@@ -94,7 +96,6 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                   _removeExercise(index);
                 }
               },
-              background: Container(color: Colors.red),
               child: GestureDetector(
                 onTap: () async {
                   Navigator.push(
@@ -109,7 +110,8 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                       ),
                     ),
                   ).then((returnedExercise) {
-                    if (returnedExercise != null && returnedExercise is WorkoutPlan) {
+                    if (returnedExercise != null &&
+                        returnedExercise is WorkoutPlan) {
                       setState(() {
                         _exercises[index] = returnedExercise;
                       });
@@ -119,10 +121,12 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
                 },
                 child: Card(
                   margin: const EdgeInsets.all(8.0),
-                  color: Colors.blue[100],
                   child: ListTile(
-                    title: Text(exercise.exerciseName!),
-                    subtitle: Text('Sets: ${exercise.sets}, Reps: ${exercise.reps}'),
+                    title: Text(exercise.exerciseName!,
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    subtitle: Text(
+                        'Sets: ${exercise.sets}, Reps: ${exercise.reps}',
+                        style: Theme.of(context).textTheme.bodySmall),
                   ),
                 ),
               ),
@@ -143,9 +147,7 @@ class _DayDetailScreenState extends State<DayDetailScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addExercise,
-        child: const Icon(Icons.add),
-      ),
+          onPressed: _addExercise, child: const Icon(Icons.add)),
     );
   }
 }

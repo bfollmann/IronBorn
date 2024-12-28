@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:iron_born/database/app_database.dart';
 import 'package:iron_born/models/exercise.dart' as model;
 import 'package:iron_born/models/program.dart' as modelProgram;
-import 'package:iron_born/models/workout_plan.dart' as modelPlan;
-import 'package:iron_born/screens/home_screen.dart';
 import 'package:iron_born/screens/edit_program_screen.dart';
+import 'package:iron_born/screens/home_screen.dart';
 import 'package:iron_born/utils/theme.dart';
 import 'package:iron_born/utils/wokout_plan_utils.dart';
 import 'package:provider/provider.dart';
@@ -20,13 +17,13 @@ void main() async {
   final existingUser = await database.getUser();
   if (existingUser == null) {
     await database.into(database.users).insert(
-      UsersCompanion.insert(
-        name: '',
-        prs: const Value({}),
-        currentProgram: const Value(null),
-        trainingMax: const Value(null),
-      ),
-    );
+          UsersCompanion.insert(
+            name: '',
+            prs: const Value({}),
+            currentProgram: const Value(null),
+            trainingMax: const Value(null),
+          ),
+        );
   }
 
   await _populateDatabase(database);
@@ -51,7 +48,8 @@ Future<void> _populateDatabase(AppDatabase database) async {
       prs: {},
     ),
     model.Exercise(
-      name: 'Bench Press',type: 'Compound',
+      name: 'Bench Press',
+      type: 'Compound',
       mainMuscleGroups: 'Chest, Triceps',
       auxiliaryMuscleGroups: 'Shoulders, Forearms',
       isFreeWeight: true,
@@ -76,7 +74,8 @@ Future<void> _populateDatabase(AppDatabase database) async {
   ];
 
   for (final exercise in initialExercises) {
-    final existingExercise = await database.exerciseDao.getExerciseByName(exercise.name);
+    final existingExercise =
+        await database.exerciseDao.getExerciseByName(exercise.name);
 
     if (existingExercise == null) {
       await database.insertExercise(exercise);
@@ -104,16 +103,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final db = Provider.of<AppDatabase>(context);
 
-    return MaterialApp(
-      title: 'Gym App',
-      theme: SynthwaveTheme.darkTheme,
-      home: HomeScreen(database: db),
-      routes: {
-        '/editProgram': (context) => EditProgramScreen(
-          database: db,
-          programId: ModalRoute.of(context)!.settings.arguments as int,
+    return ChromaticAberration(
+      offset: 3.00,
+      child: FilmGrain(
+        grainIntensity: 1.0,
+        child: MaterialApp(
+          title: 'IronBorn',
+          theme: SynthwaveTheme.darkTheme,
+          home: HomeScreen(database: db),
+          routes: {
+            '/editProgram': (context) => EditProgramScreen(
+                  database: db,
+                  programId: ModalRoute.of(context)!.settings.arguments as int,
+                ),
+          },
         ),
-      },
+      ),
     );
   }
 }

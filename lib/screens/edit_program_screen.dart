@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iron_born/database/app_database.dart' as db;
-import 'package:iron_born/models/workout_plan.dart' as model;
 import 'package:iron_born/models/program.dart' as modelProgram;
+import 'package:iron_born/models/workout_plan.dart' as model;
 import 'package:iron_born/screens/day_detail_screen.dart';
 
 class EditProgramScreen extends StatefulWidget {
@@ -45,64 +45,69 @@ class _EditProgramScreenState extends State<EditProgramScreen> {
       body: _program == null
           ? const Center(child: CircularProgressIndicator())
           : ReorderableListView(
-        children: _program!.workoutPlansByDay.entries.map((entry) {
-          final dayName = entry.key;
-          final workoutPlansForDay = entry.value;
+              children: _program!.workoutPlansByDay.entries.map((entry) {
+                final dayName = entry.key;
+                final workoutPlansForDay = entry.value;
 
-          return ReorderableDragStartListener(
-            key: ValueKey(dayName),
-            index: _program!.workoutPlansByDay.keys.toList().indexOf(dayName),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DayDetailScreen(
-                      dayName: dayName,
-                      database: widget.database,
+                return ReorderableDragStartListener(
+                  key: ValueKey(dayName),
+                  index: _program!.workoutPlansByDay.keys
+                      .toList()
+                      .indexOf(dayName),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DayDetailScreen(
+                            dayName: dayName,
+                            database: widget.database,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        title: Text(dayName,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                      ),
                     ),
                   ),
                 );
+              }).toList(),
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (oldIndex < newIndex) {
+                    newIndex -= 1;
+                  }
+                  final dayName =
+                      _program!.workoutPlansByDay.keys.elementAt(oldIndex);
+                  final workoutPlansForDay =
+                      _program!.workoutPlansByDay.remove(dayName)!;
+
+                  final updatedWorkoutPlansByDay =
+                      <String, List<model.WorkoutPlan>>{};
+                  int currentIndex = 0;
+                  for (final entry in _program!.workoutPlansByDay.entries) {
+                    if (currentIndex == newIndex) {
+                      updatedWorkoutPlansByDay[dayName] = workoutPlansForDay;
+                    }
+                    updatedWorkoutPlansByDay[entry.key] = entry.value;
+                    currentIndex++;
+                  }
+                  if (currentIndex == newIndex) {
+                    updatedWorkoutPlansByDay[dayName] = workoutPlansForDay;
+                  }
+
+                  _program = modelProgram.Program(
+                    id: _program!.id,
+                    name: _program!.name,
+                    workoutPlansByDay: updatedWorkoutPlansByDay,
+                  );
+                });
               },
-              child: Card(
-                margin: const EdgeInsets.all(8.0),
-                color: Colors.blue[100],
-                child: ListTile(
-                  title: Text(dayName),
-                ),
-              ),
             ),
-          );
-        }).toList(),
-        onReorder: (oldIndex, newIndex) {
-          setState(() {
-            if (oldIndex < newIndex) {
-              newIndex -= 1;
-            }
-            final dayName = _program!.workoutPlansByDay.keys.elementAt(oldIndex);
-            final workoutPlansForDay = _program!.workoutPlansByDay.remove(dayName)!;
-
-            final updatedWorkoutPlansByDay = <String, List<model.WorkoutPlan>>{};
-            int currentIndex = 0;
-            for (final entry in _program!.workoutPlansByDay.entries) {
-              if (currentIndex == newIndex) {
-                updatedWorkoutPlansByDay[dayName] = workoutPlansForDay;
-              }
-              updatedWorkoutPlansByDay[entry.key] = entry.value;
-              currentIndex++;
-            }
-            if (currentIndex == newIndex) {
-              updatedWorkoutPlansByDay[dayName] = workoutPlansForDay;
-            }
-
-            _program = modelProgram.Program(
-              id: _program!.id,
-              name: _program!.name,
-              workoutPlansByDay: updatedWorkoutPlansByDay,
-            );
-          });
-        },
-      ),
     );
   }
 }
